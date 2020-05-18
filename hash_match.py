@@ -14,6 +14,8 @@ from skimage import transform, img_as_ubyte
 import logging
 from req_tool import read_img_from_net
 
+logger = logging.getLogger(__name__)
+
 
 def img_to_hashes(url, p=False, d=False, a=False, w=False):
     """
@@ -78,7 +80,7 @@ def img_to_hashes(url, p=False, d=False, a=False, w=False):
             data['w']['h'] = pHash(h_flip)
             data['w']['v'] = pHash(v_flip)
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
 
     return data
 

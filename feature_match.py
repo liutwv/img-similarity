@@ -12,6 +12,8 @@ import cv2
 import logging
 from req_tool import read_img_from_net
 
+logger = logging.getLogger(__name__)
+
 
 def feature_similarity(img1_url, img2_url, type='o'):
     """
@@ -57,5 +59,5 @@ def orb_similarity(img1, img2):
         similarity = len(good) / len(matches)
         return similarity
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
         return '0'

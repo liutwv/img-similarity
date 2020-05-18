@@ -8,11 +8,15 @@
 """
 from flask import Flask, request, jsonify, make_response
 import logging
+from logging.handlers import TimedRotatingFileHandler
+import datetime
+import settings
 import hash_match
 import feature_match
 import c_hist_match
 
 app = Flask(__name__)
+logger = logging.getLogger(__name__)
 
 
 @app.route('/chist', endpoint="chist", methods=['POST'])
@@ -25,10 +29,10 @@ def calculate_cindy_hist():
 
     try:
         data = c_hist_match.get_hist(url)
-        logging.info(data)
+        logger.info(data)
         return make_response(jsonify(data), 200)
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
         return make_response({}, 500)
 
 
@@ -43,10 +47,10 @@ def calculate_img_phash():
 
     try:
         data = hash_match.img_to_hashes(url, 'p' in hs, 'd' in hs, 'a' in hs)
-        logging.info(data)
+        logger.info(data)
         return make_response(jsonify(data), 200)
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
         return make_response({}, 500)
 
 
@@ -62,10 +66,10 @@ def calculate_hamming_distance():
 
     try:
         data = hash_match.calculate_hamming_distance_btw_imgs(url1, url2, 'p' in hs, 'd' in hs, 'a' in hs)
-        logging.info(data)
+        logger.info(data)
         return make_response(jsonify(data), 200)
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
         return make_response({}, 500)
 
 
@@ -81,27 +85,41 @@ def calculate_feature_similarity():
 
     try:
         data = feature_match.feature_similarity(url1, url2, type)
-        logging.info(data)
+        logger.info(data)
         return make_response(jsonify(data), 200)
-
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
         return make_response({}, 500)
 
 
-if __name__ == '__main__':
+def register_log():
+    """
+    配置日志
+    :return:
+    """
+    info_log = settings.RUN_LOG_FILE
+    err_log = settings.ERROR_LOG_FILE
+
+    fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    handler = TimedRotatingFileHandler(info_log, when='midnight', interval=1, backupCount=7, atTime=datetime.time(0, 0, 0, 0))
+    handler.setLevel(logging.INFO)
+    err_handler = TimedRotatingFileHandler(err_log, when='midnight', interval=1, backupCount=7, atTime=datetime.time(0, 0, 0, 0))
+    err_handler.setLevel(logging.ERROR)
+
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+
     logging.basicConfig(
-        # 日志级别
-        level=logging.DEBUG,
-        # 日志格式
-        # 时间、代码所在文件名、代码行号、日志级别名字、日志信息
-        format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-        # 打印日志的时间
-        datefmt='%a, %d %b %Y %H:%M:%S',
-        # 日志文件存放的目录（目录必须存在）及日志文件名
-        filename='/opt/logs/img-similarity.log',
-        # 打开日志文件的方式
-        filemode='w'
+        format=fmt,
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=[handler, err_handler, console]
     )
+    logging.getLogger(__name__).setLevel(logging.INFO)
+
+
+if __name__ == '__main__':
+    register_log()
 
     app.run(host='0.0.0.0', port='5001')

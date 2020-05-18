@@ -16,6 +16,8 @@ from math import sqrt
 import logging
 from req_tool import read_img_from_net
 
+logger = logging.getLogger(__name__)
+
 
 def get_hist(img_url):
     """
@@ -55,7 +57,7 @@ def calc_bgr_hist(img):
                 index = maped_b * 8 * 8 + maped_g * 8 + maped_r
                 hist[index] = hist.get(index, 0) + 1
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
 
     return hist
 
@@ -82,7 +84,7 @@ def compare_similar_hist(h1, h2):
         # 按照余弦相似性定理计算相似度
         similarity = sum_mixd / (sqrt(sum1) * sqrt(sum2))
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
 
     return similarity
 

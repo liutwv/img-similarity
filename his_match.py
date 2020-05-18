@@ -12,6 +12,8 @@ import cv2
 from req_tool import read_img_from_net
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 def single_sim(img1_url, img2_url):
     return calculate(read_img_from_net(img1_url), read_img_from_net(img2_url))
@@ -40,7 +42,7 @@ def calculate(image1, image2):
                 degree = degree + 1
         degree = degree / len(hist1)
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
     return degree
 
 
@@ -61,5 +63,5 @@ def classify_hist_with_split(image1, image2, size=(256, 256)):
             sub_data += calculate(im1, im2)
         hist = sub_data / 3
     except Exception as e:
-        logging.info(e)
+        logger.info(e)
     return hist
