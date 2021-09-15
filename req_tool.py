@@ -7,9 +7,9 @@
 @Software: PyCharm
 """
 
-from skimage import io
-from urllib import request
-
+import requests
+import cv2
+import numpy as np
 
 def read_img_from_net(img_url):
     """
@@ -19,6 +19,9 @@ def read_img_from_net(img_url):
     Returns:
         numpy.ndarray
     """
-    img_url = request.quote(img_url, safe=";/?:@&=+$,", encoding="utf-8")
-    return io.imread(img_url)
+    img_data = requests.get(img_url).content
+    img = np.asarray(bytearray(img_data), dtype="uint8")
+    img = cv2.imdecode(img, -1)
+
+    return img
 
